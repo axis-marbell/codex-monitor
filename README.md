@@ -267,3 +267,12 @@ Duplicate wakes
 Self-triggered wakes
 : Set `actor_filter.ignore_self_username` to the GitLab username used by the
   agent.
+
+## Contributing
+
+See `CONTRIBUTING.md` for contributor policy, local validation, monitor safety,
+and documentation expectations.
+
+## License
+
+MIT. See `LICENSE`.
