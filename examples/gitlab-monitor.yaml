@@ -1,0 +1,44 @@
+# codex-monitor — GitLab monitor config
+# Copy to ~/.config/codex-monitor/gitlab-monitor.yaml and chmod 600.
+# Keep real project paths and tokens out of this public repo.
+
+monitor:
+  name: my-gitlab-monitor
+  type: gitlab
+
+gitlab:
+  host: ${CODEX_MONITOR_GITLAB_HOST}
+  token: ${CODEX_MONITOR_GITLAB_TOKEN}
+  projects:
+    - group/project-a
+    - group/project-b
+
+events:
+  merge_requests: true
+  merge_request_comments: true
+  issues: true
+  issue_comments: true
+  pushes: false
+  pipelines: false
+
+actor_filter:
+  ignore_self_username: my-agent-username
+  trusted_actors:
+    - operator-username
+
+delivery:
+  tmux_target: my-agent-session
+  poll_interval_seconds: 90
+  idle_check: true
+  idle_check_max_skip: 5
+  warmdown_seconds: 0
+  dry_run: false
+
+wake_message_template: |
+  [wake-codex] {project}: {event_type}
+  URL:    {url}
+  Actor:  {actor}
+  Title:  {title}
+  ID:     {event_id}
+
+  Action: source the latest state from the URL before acting.
