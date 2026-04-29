@@ -51,6 +51,18 @@ def test_run_once_queues_when_tmux_not_idle(monkeypatch, tmp_path):
         lambda self, message, idle_check=True, dry_run=False: type("R", (), {"outcome": "queued_not_idle", "success": False})(),
     )
     config = _config(tmp_path)
+    config = CodexMonitorConfig(
+        monitor=config.monitor,
+        gitlab=config.gitlab,
+        events=config.events,
+        actor_filter=config.actor_filter,
+        delivery=DeliveryConfig(
+            tmux_target=config.delivery.tmux_target,
+            idle_check=True,
+            state_path=config.delivery.state_path,
+            log_path=config.delivery.log_path,
+        ),
+    )
 
     run_once(config)
     count = run_once(config)

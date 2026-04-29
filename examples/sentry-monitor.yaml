@@ -17,7 +17,9 @@ sentry:
 delivery:
   tmux_target: my-agent-session
   poll_interval_seconds: 90
-  idle_check: true
+  # Experimental. Keep disabled for active Codex panes unless you have verified
+  # the prompt heuristic against your exact tmux setup.
+  idle_check: false
   idle_check_max_skip: 5
   dry_run: true
 

@@ -42,11 +42,17 @@ Run:
 codex-monitor tmux test --target <target> --message "Wake test from codex-monitor"
 ```
 
-If the pane does not look idle, either wait and retry or use a deliberate
-manual test:
+This sends without an idle check. That is the expected setup for active Codex
+panes.
+
+Do not enable the experimental idle check during normal setup. It can
+misclassify an active Codex pane as not idle and queue valid wake messages
+instead of delivering them.
+
+Only if the operator explicitly wants to test the heuristic, run:
 
 ```bash
-codex-monitor tmux test --target <target> --message "Wake test from codex-monitor" --no-idle-check
+codex-monitor tmux test --target <target> --message "Wake test from codex-monitor" --idle-check
 ```
 
 Result:
@@ -71,6 +77,15 @@ chmod 600 ~/.config/codex-monitor/<name>.yaml
 
 Use env-var references for secrets. Do not write literal tokens into the file
 unless the operator explicitly accepts that local risk.
+
+Set delivery with the idle check disabled unless the operator has already
+validated the experimental prompt heuristic:
+
+```yaml
+delivery:
+  tmux_target: <target>
+  idle_check: false
+```
 
 Configure the wake message with universal fields first:
 

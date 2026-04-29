@@ -64,16 +64,22 @@ codex-monitor tmux test \
   --message "Wake test from codex-monitor"
 ```
 
-By default, `tmux test` uses a conservative idle check before sending keys. If
-the pane does not look idle, the test returns `queued_not_idle` and sends
-nothing. For a one-off manual test, you can bypass that check:
+By default, `tmux test` sends without an idle check. This is the recommended
+mode for active Codex panes.
+
+An experimental idle check can be enabled explicitly:
 
 ```bash
 codex-monitor tmux test \
   --target codex-agent \
   --message "Wake test from codex-monitor" \
-  --no-idle-check
+  --idle-check
 ```
+
+The idle check uses a conservative prompt heuristic. If the pane does not look
+idle, the test returns `queued_not_idle` and sends nothing. Active Codex panes
+can be misclassified as not idle, so do not enable this unless you have verified
+it against your exact tmux setup.
 
 ## Why Two `send-keys` Calls
 
@@ -139,17 +145,23 @@ Stop it:
 codex-monitor stop --config ~/.config/codex-monitor/gitlab-monitor.yaml
 ```
 
-## Idle Check And Queued Delivery
+## Experimental Idle Check
 
-If `delivery.idle_check` is enabled, the monitor checks the last captured tmux
-pane line before sending keys. If the pane does not look idle, the wake is not
-dropped. It is stored in the monitor state file and retried on later cycles.
+`delivery.idle_check` defaults to `false`. Leave it disabled for Codex agents
+unless you have verified the prompt heuristic against the exact tmux pane the
+monitor will wake.
 
-Disable the heuristic if it is wrong for your shell or Codex setup:
+If enabled, the monitor checks the last captured tmux pane line before sending
+keys. If the pane does not look idle, the wake is not dropped. It is stored in
+the monitor state file and retried on later cycles. In live testing, active
+Codex panes were misclassified as not idle and valid wakes stayed queued until
+the check was disabled.
+
+Opt in only for a known-compatible shell prompt:
 
 ```yaml
 delivery:
-  idle_check: false
+  idle_check: true
 ```
 
 ## State And Logs
@@ -240,9 +252,9 @@ changing the renderer.
 : Install tmux and retry.
 
 `queued_not_idle`
-: The target pane did not look idle. Wait for the next cycle, lower the
-  strictness by setting `idle_check: false`, or use `--no-idle-check` for a
-  manual test.
+: The experimental idle check is enabled and the target pane did not look idle.
+  Active Codex panes can trigger this incorrectly. Set `idle_check: false` and
+  rerun one monitor cycle to flush queued wake messages.
 
 No wake after start
 : Run `codex-monitor run-once --config <path> --dry-run`, inspect the log path,

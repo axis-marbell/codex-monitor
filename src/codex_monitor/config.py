@@ -60,7 +60,7 @@ class ActorFilterConfig:
 class DeliveryConfig:
     tmux_target: str
     poll_interval_seconds: int = 90
-    idle_check: bool = True
+    idle_check: bool = False
     idle_check_max_skip: int = 5
     dry_run: bool = False
     state_path: Path | None = None
@@ -180,7 +180,7 @@ def load_config(path: str | Path) -> CodexMonitorConfig:
     delivery = DeliveryConfig(
         tmux_target=str(delivery_raw.get("tmux_target") or "").strip(),
         poll_interval_seconds=_int(delivery_raw, "poll_interval_seconds", 90),
-        idle_check=_bool(delivery_raw, "idle_check", True),
+        idle_check=_bool(delivery_raw, "idle_check", False),
         idle_check_max_skip=_int(delivery_raw, "idle_check_max_skip", 5),
         dry_run=_bool(delivery_raw, "dry_run", False),
         state_path=Path(str(state_path_raw)).expanduser() if state_path_raw else state_dir / f"{monitor.name}.json",

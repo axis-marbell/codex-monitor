@@ -37,7 +37,16 @@ def build_parser() -> argparse.ArgumentParser:
     test_parser = tmux_sub.add_parser("test", help="Send a test wake message to a tmux target")
     test_parser.add_argument("--target", required=True)
     test_parser.add_argument("--message", default="Wake test from codex-monitor")
-    test_parser.add_argument("--no-idle-check", action="store_true")
+    test_parser.add_argument(
+        "--idle-check",
+        action="store_true",
+        help="Experimental: queue instead of sending if the target pane does not look idle",
+    )
+    test_parser.add_argument(
+        "--no-idle-check",
+        action="store_true",
+        help=argparse.SUPPRESS,
+    )
     test_parser.set_defaults(func=cmd_tmux_test)
 
     run_parser = subparsers.add_parser("run-once", help="Run one monitor cycle")
@@ -78,7 +87,7 @@ def cmd_tmux_detect(_args: argparse.Namespace) -> int:
 def cmd_tmux_test(args: argparse.Namespace) -> int:
     result = TmuxDelivery(args.target).deliver(
         args.message,
-        idle_check=not args.no_idle_check,
+        idle_check=args.idle_check and not args.no_idle_check,
     )
     print(result.outcome)
     if result.reason:
