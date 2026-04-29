@@ -49,3 +49,24 @@ def test_delivery_uses_two_send_keys_calls(monkeypatch):
         ["tmux", "send-keys", "-t", "agent", "wake"],
         ["tmux", "send-keys", "-t", "agent", "Enter"],
     ]
+
+
+def test_delivery_default_skips_idle_check(monkeypatch):
+    calls = []
+
+    def fake_run(args, **kwargs):
+        calls.append(args)
+        if args[:2] == ["tmux", "has-session"]:
+            return subprocess.CompletedProcess(args, 0)
+        if args[:2] == ["tmux", "send-keys"]:
+            return subprocess.CompletedProcess(args, 0)
+        raise AssertionError(f"unexpected command: {args}")
+
+    monkeypatch.setattr("codex_monitor.tmux_delivery.tmux_available", lambda: True)
+    monkeypatch.setattr("time.sleep", Mock())
+    monkeypatch.setattr(subprocess, "run", fake_run)
+
+    result = TmuxDelivery("agent").deliver("wake")
+
+    assert result.outcome == "delivered"
+    assert not any(call[:2] == ["tmux", "capture-pane"] for call in calls)

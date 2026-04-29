@@ -75,7 +75,7 @@ class TmuxDelivery:
         last = lines[-1]
         return any(last.endswith(suffix.rstrip()) or last.endswith(suffix) for suffix in PROMPT_SUFFIXES)
 
-    def deliver(self, message: str, *, idle_check: bool = True, dry_run: bool = False) -> DeliveryResult:
+    def deliver(self, message: str, *, idle_check: bool = False, dry_run: bool = False) -> DeliveryResult:
         if dry_run:
             return DeliveryResult(True, "dry_run")
         if not tmux_available():
