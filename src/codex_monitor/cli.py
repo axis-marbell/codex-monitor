@@ -11,6 +11,7 @@ import time
 from pathlib import Path
 
 from .config import ConfigError, load_config
+from .monitors.gitlab import GitLabError
 from .runner import run_once
 from .tmux_delivery import TmuxDelivery, detect_current_target, tmux_available
 
@@ -87,7 +88,11 @@ def cmd_tmux_test(args: argparse.Namespace) -> int:
 
 def cmd_run_once(args: argparse.Namespace) -> int:
     config = load_config(args.config)
-    count = run_once(config, dry_run=args.dry_run)
+    try:
+        count = run_once(config, dry_run=args.dry_run)
+    except GitLabError as exc:
+        print(f"GitLab fetch failed: {exc}", file=sys.stderr)
+        return 2
     print(f"processed {count} wake candidate(s)")
     return 0
 

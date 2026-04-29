@@ -54,7 +54,6 @@ class EventConfig:
 @dataclass(frozen=True)
 class ActorFilterConfig:
     ignore_self_username: str = ""
-    trusted_actors: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -63,7 +62,6 @@ class DeliveryConfig:
     poll_interval_seconds: int = 90
     idle_check: bool = True
     idle_check_max_skip: int = 5
-    warmdown_seconds: int = 0
     dry_run: bool = False
     state_path: Path | None = None
     log_path: Path | None = None
@@ -171,14 +169,8 @@ def load_config(path: str | Path) -> CodexMonitorConfig:
     )
 
     actor_raw = _mapping(expanded, "actor_filter")
-    trusted_raw = actor_raw.get("trusted_actors", [])
-    if trusted_raw is None:
-        trusted_raw = []
-    if not isinstance(trusted_raw, list):
-        raise ConfigError("actor_filter.trusted_actors must be a list")
     actor_filter = ActorFilterConfig(
         ignore_self_username=str(actor_raw.get("ignore_self_username") or "").strip(),
-        trusted_actors=tuple(str(actor).strip() for actor in trusted_raw if str(actor).strip()),
     )
 
     delivery_raw = _mapping(expanded, "delivery")
@@ -190,7 +182,6 @@ def load_config(path: str | Path) -> CodexMonitorConfig:
         poll_interval_seconds=_int(delivery_raw, "poll_interval_seconds", 90),
         idle_check=_bool(delivery_raw, "idle_check", True),
         idle_check_max_skip=_int(delivery_raw, "idle_check_max_skip", 5),
-        warmdown_seconds=_int(delivery_raw, "warmdown_seconds", 0),
         dry_run=_bool(delivery_raw, "dry_run", False),
         state_path=Path(str(state_path_raw)).expanduser() if state_path_raw else state_dir / f"{monitor.name}.json",
         log_path=Path(str(log_path_raw)).expanduser() if log_path_raw else state_dir / f"{monitor.name}.log",
