@@ -46,3 +46,6 @@ def test_gitlab_monitor_builds_events_and_filters_self():
 
     assert [event.event_type for event in events] == ["merge_request.opened", "merge_request.comment"]
     assert events[1].actor == "reviewer"
+    assert events[0].summary == "Add monitor"
+    assert events[0].extras["project"] == "group/project"
+    assert events[0].extras["mr_iid"] == "1"

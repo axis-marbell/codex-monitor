@@ -27,7 +27,7 @@ def _config(tmp_path):
 
 def test_run_once_primes_state_without_replaying(monkeypatch, tmp_path):
     events = [
-        MonitorEvent("merge_requests", "event-1", "merge_request.opened", "group/project", "url", "actor", "title")
+        MonitorEvent("merge_requests", "event-1", "merge_request.opened", "url", "actor", "summary", {"project": "group/project"})
     ]
     monkeypatch.setattr("codex_monitor.monitors.gitlab.GitLabMonitor.fetch_events", lambda self: events)
 
@@ -39,10 +39,10 @@ def test_run_once_primes_state_without_replaying(monkeypatch, tmp_path):
 
 def test_run_once_queues_when_tmux_not_idle(monkeypatch, tmp_path):
     first = [
-        MonitorEvent("merge_requests", "event-1", "merge_request.opened", "group/project", "url", "actor", "title")
+        MonitorEvent("merge_requests", "event-1", "merge_request.opened", "url", "actor", "summary", {"project": "group/project"})
     ]
     second = first + [
-        MonitorEvent("merge_requests", "event-2", "merge_request.opened", "group/project", "url", "actor", "title")
+        MonitorEvent("merge_requests", "event-2", "merge_request.opened", "url", "actor", "summary", {"project": "group/project"})
     ]
     calls = iter([first, second])
     monkeypatch.setattr("codex_monitor.monitors.gitlab.GitLabMonitor.fetch_events", lambda self: next(calls))

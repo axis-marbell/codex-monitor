@@ -32,10 +32,10 @@ delivery:
   dry_run: false
 
 wake_message_template: |
-  [wake-codex] {project}: {event_type}
+  [wake-codex] {extras.project}: {event_type}
   URL:    {url}
   Actor:  {actor}
-  Title:  {title}
+  Title:  {summary}
   ID:     {event_id}
 
   Action: source the latest state from the URL before acting.
