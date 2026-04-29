@@ -1,0 +1,39 @@
+# codex-monitor — future Sentry monitor envelope example
+# This is not runnable until codex-monitor has a Sentry backend.
+# It documents how a second monitor type can extend wake templates without
+# changing src/codex_monitor/render.py.
+
+monitor:
+  name: my-sentry-monitor
+  type: sentry
+
+sentry:
+  organization: ${CODEX_MONITOR_SENTRY_ORG}
+  token: ${CODEX_MONITOR_SENTRY_TOKEN}
+  projects:
+    - payments-api
+    - storefront
+
+delivery:
+  tmux_target: my-agent-session
+  poll_interval_seconds: 90
+  idle_check: true
+  idle_check_max_skip: 5
+  dry_run: true
+
+# Universal fields are always available:
+# {source}, {event_type}, {url}, {actor}, {summary}, {event_id}
+#
+# A future Sentry monitor would populate monitor-specific values under extras.
+# This template can reference those as {extras.service}, {extras.environment},
+# and {extras.severity} without any renderer changes.
+wake_message_template: |
+  [wake-codex] {event_type} ({extras.service})
+  URL:    {url}
+  Actor:  {actor}
+  Summary: {summary}
+  Env:    {extras.environment}
+  Level:  {extras.severity}
+  ID:     {event_id}
+
+  Action: source the latest state from the URL before acting.

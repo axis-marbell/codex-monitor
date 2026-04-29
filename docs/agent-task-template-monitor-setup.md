@@ -72,6 +72,41 @@ chmod 600 ~/.config/codex-monitor/<name>.yaml
 Use env-var references for secrets. Do not write literal tokens into the file
 unless the operator explicitly accepts that local risk.
 
+Configure the wake message with universal fields first:
+
+```text
+{source}
+{event_type}
+{url}
+{actor}
+{summary}
+{event_id}
+```
+
+Use monitor-specific `extras` only when the operator needs source-specific
+context. For GitLab, `{extras.project}` names the configured project path.
+Other GitLab extras may include `{extras.mr_iid}`, `{extras.issue_iid}`,
+`{extras.note_id}`, and `{extras.state}` depending on the event.
+
+Example GitLab-specific wake template:
+
+```yaml
+wake_message_template: |
+  [wake-codex] {extras.project}: {event_type}
+  URL:    {url}
+  Actor:  {actor}
+  Summary: {summary}
+  ID:     {event_id}
+
+  Action: source the latest state from the URL before acting.
+```
+
+For a new monitor type, keep the same universal fields and add source-specific
+operator context under `extras`. For example, a future Sentry monitor could
+render `{extras.service}`, `{extras.environment}`, and `{extras.severity}`
+without changing the renderer. See `examples/sentry-monitor.yaml` for the
+stubbed envelope shape.
+
 ## Dry-Run Verification
 
 Run:

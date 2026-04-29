@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import dataclasses
 from pathlib import Path
+from typing import Any
 
 from .config import CodexMonitorConfig
 from .logging_utils import append_log
@@ -46,10 +47,10 @@ def run_once(config: CodexMonitorConfig, *, dry_run: bool = False) -> int:
             "source_key": _source_key(event),
             "event_id": event.event_id,
             "event_type": event.event_type,
-            "project": event.project,
+            "source": event.source,
             "url": event.url,
             "actor": event.actor,
-            "title": event.title,
+            "summary": event.summary,
             "message": message,
         }
         outcome = _deliver_or_queue(config, state, delivery, log_path, wake, effective_dry_run)
@@ -70,7 +71,7 @@ def _required_path(path: Path | None) -> Path:
 
 
 def _source_key(event: MonitorEvent) -> str:
-    return f"{event.source}:{event.project}"
+    return f"{event.source}:{event.extras.get('project', event.source)}"
 
 
 def _select_new_events(events: list[MonitorEvent], state: MonitorState) -> list[MonitorEvent]:
@@ -167,4 +168,15 @@ def event_to_dict(event: MonitorEvent, template: str) -> dict[str, str]:
     wake = dataclasses.asdict(event)
     wake["source_key"] = _source_key(event)
     wake["message"] = render_wake_message(template, event)
-    return {key: str(value) for key, value in wake.items()}
+    return _stringify(wake)
+
+
+def _stringify(value: dict[str, Any]) -> dict[str, str]:
+    rendered: dict[str, str] = {}
+    for key, item in value.items():
+        if isinstance(item, dict):
+            for child_key, child_value in item.items():
+                rendered[f"{key}.{child_key}"] = str(child_value)
+        else:
+            rendered[key] = str(item)
+    return rendered

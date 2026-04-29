@@ -18,10 +18,10 @@ class ConfigError(ValueError):
 _ENV_REF_RE = re.compile(r"^\$\{([A-Za-z_][A-Za-z0-9_]*)\}$")
 _ENV_EXPAND_RE = re.compile(r"\$\{([A-Za-z_][A-Za-z0-9_]*)\}")
 DEFAULT_WAKE_MESSAGE_TEMPLATE = (
-    "[wake-codex] {project}: {event_type}\n"
+    "[wake-codex] {event_type} ({source})\n"
     "URL:    {url}\n"
     "Actor:  {actor}\n"
-    "Title:  {title}\n"
+    "Summary: {summary}\n"
     "ID:     {event_id}\n\n"
     "Action: source the latest state from the URL before acting."
 )

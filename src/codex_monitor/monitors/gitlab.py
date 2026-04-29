@@ -87,10 +87,10 @@ class GitLabMonitor:
                     source="merge_requests",
                     event_id=f"{project}:mr:{iid}:{state}:{mr.get('updated_at', '')}",
                     event_type=f"merge_request.{state}",
-                    project=project,
                     url=str(mr.get("web_url") or ""),
                     actor=actor,
-                    title=str(mr.get("title") or f"MR !{iid}"),
+                    summary=str(mr.get("title") or f"MR !{iid}"),
+                    extras={"project": project, "mr_iid": str(iid), "state": state},
                 )
             )
         return events
@@ -106,10 +106,10 @@ class GitLabMonitor:
                     source="issues",
                     event_id=f"{project}:issue:{iid}:{state}:{issue.get('updated_at', '')}",
                     event_type=f"issue.{state}",
-                    project=project,
                     url=str(issue.get("web_url") or ""),
                     actor=actor,
-                    title=str(issue.get("title") or f"Issue #{iid}"),
+                    summary=str(issue.get("title") or f"Issue #{iid}"),
+                    extras={"project": project, "issue_iid": str(iid), "state": state},
                 )
             )
         return events
@@ -138,10 +138,10 @@ class GitLabMonitor:
                         source=source,
                         event_id=f"{project}:{resource}:{iid}:note:{note_id}",
                         event_type=event_type,
-                        project=project,
                         url=str(note.get("web_url") or item.get("web_url") or ""),
                         actor=actor,
-                        title=title,
+                        summary=title,
+                        extras={"project": project, "note_id": str(note_id), "iid": str(iid)},
                     )
                 )
         return events
@@ -166,10 +166,10 @@ class GitLabMonitor:
                     source="pushes",
                     event_id=f"{project}:push:{event_id}",
                     event_type="push",
-                    project=project,
                     url=str(event.get("target_url") or ""),
                     actor=actor,
-                    title=target_title,
+                    summary=target_title,
+                    extras={"project": project},
                 )
             )
         return events

@@ -184,6 +184,56 @@ Deferred from v1:
 - approvals
 - scheduled jobs
 
+## Wake Message Templates
+
+The default wake template uses only universal event fields:
+
+```text
+[wake-codex] {event_type} ({source})
+URL:    {url}
+Actor:  {actor}
+Summary: {summary}
+ID:     {event_id}
+
+Action: source the latest state from the URL before acting.
+```
+
+Universal fields are available for every monitor type:
+
+- `{source}`: monitor source stream, such as `merge_requests`, `issues`, or `pushes`
+- `{event_type}`: normalized event name, such as `merge_request.opened`
+- `{url}`: source URL to inspect before acting
+- `{actor}`: username or actor that triggered the event
+- `{summary}`: short event descriptor
+- `{event_id}`: stable dedupe ID
+
+Monitor-specific fields live under `extras`. GitLab events include
+`{extras.project}` and may also include keys such as `{extras.mr_iid}`,
+`{extras.issue_iid}`, `{extras.note_id}`, or `{extras.state}` depending on the
+event type.
+
+GitLab-flavored custom template:
+
+```yaml
+wake_message_template: |
+  [wake-codex] {extras.project}: {event_type}
+  URL:    {url}
+  Actor:  {actor}
+  Title:  {summary}
+  ID:     {event_id}
+
+  Action: source the latest state from the URL before acting.
+```
+
+If an `extras` key is missing, it renders as an empty string. Prefer universal
+fields in reusable templates and use `extras` only for monitor-specific
+operator-facing messages.
+
+See `examples/sentry-monitor.yaml` for a non-runnable second-monitor envelope
+example. It shows how a future monitor can add keys such as
+`{extras.service}`, `{extras.environment}`, and `{extras.severity}` without
+changing the renderer.
+
 ## Troubleshooting
 
 `tmux is not installed or not on PATH`
